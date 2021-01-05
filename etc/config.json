@@ -1,0 +1,20 @@
+{
+  "logger": {
+    "path": "/opt/log/lvodQuery.log",
+    "level": "info"
+  },
+  "vodQueryRpc": {
+    "addr": "0.0.0.0:28124"
+  },
+  "pprof": "0.0.0.0:28122",
+  "db": {
+    "username":"root",
+    "password": "123456",
+    "dbName":   "lvod",
+    "addr":     "127.0.0.1:3306"
+  },
+  "redis": {
+    "addr": "127.0.0.1:6379",
+    "password": ""
+  }
+}

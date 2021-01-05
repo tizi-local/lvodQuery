@@ -1,0 +1,55 @@
+syntax = "proto3";
+
+import "google/protobuf/any.proto";
+
+package tizi.local.lvodquery;
+
+option go_package = "proto/vodQuery;tizi_local_proto_lvodQuery";
+
+service VodQueryService{
+  rpc FeedQuery (FeedQueryReq) returns(FeedQueryResp);
+  //rpc CommentQuery()returns();
+  //rpc CommentCreate()returns();
+}
+
+message FeedQueryReq{
+  int64 page = 1;
+  Filter filterType = 2;
+  string vSession = 3;
+}
+enum Filter{
+  default = 0;
+  nearby = 1;
+  follow = 2;
+}
+
+message FeedQueryResp{
+  string session = 1;
+  int64 total = 2;
+  int64 page = 3;
+  repeated Videos videos = 4;
+}
+
+message Videos{
+  string vid = 1;
+  string videoUrl = 2;
+  string videoDesc = 3;
+  string videoTitle = 4;
+  int64 likeCount = 5;
+  int64 commentCount = 6;
+  int64 forwardCount = 7;
+  int64 favoriteCount = 8;
+  Author author = 10;
+  repeated Poi poi = 9;
+}
+message Author{
+  string uid = 1;
+  string name = 2;
+}
+message Poi{
+  string name = 1;
+  string poiId = 2;
+  string tags = 3;
+  double longitude = 4;
+  double latitude = 5;
+}
