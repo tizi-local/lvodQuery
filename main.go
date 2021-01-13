@@ -4,12 +4,12 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"github.com/tizi-local/lvodQuery/internal/cache"
-	tizi_local_proto_lvodQuery "github.com/tizi-local/lvodQuery/proto/vodQuery"
 	"github.com/tizi-local/lvodQuery/config"
+	"github.com/tizi-local/lvodQuery/internal/cache"
 	"github.com/tizi-local/lvodQuery/internal/db"
 	"github.com/tizi-local/lvodQuery/internal/rpc"
 	"github.com/tizi-local/lvodQuery/log"
+	tizi_local_proto_lvodQuery "github.com/tizi-local/lvodQuery/proto/vodQuery"
 	"google.golang.org/grpc"
 	"io/ioutil"
 	"net"
@@ -70,7 +70,7 @@ func main() {
 	// init by config file
 	logger := log.NewLogger(appConfig.Logger)
 	db.InitDBEngine(appConfig.DB, logger)
-	cache.InitCacheService(appConfig.Redis,logger)
+	cache.InitCacheService(appConfig.Redis, logger)
 	s := grpc.NewServer()
 	conn, err := net.Listen("tcp", appConfig.VodQueryRpc.Addr)
 	if err != nil {
@@ -78,7 +78,7 @@ func main() {
 		return
 	}
 	vodQueryService := rpc.NewVodQueryService(logger)
-	tizi_local_proto_lvodQuery.RegisterVodQueryServiceServer(s,vodQueryService)
+	tizi_local_proto_lvodQuery.RegisterVodQueryServiceServer(s, vodQueryService)
 	if err := s.Serve(conn); err != nil {
 		logger.Error("serve auth rpc failed:", err.Error())
 	}

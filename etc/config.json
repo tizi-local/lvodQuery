@@ -9,7 +9,7 @@
   "pprof": "0.0.0.0:28122",
   "db": {
     "username":"root",
-    "password": "123456",
+    "password": "12345678",
     "dbName":   "lvod",
     "addr":     "127.0.0.1:3306"
   },

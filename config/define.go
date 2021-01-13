@@ -2,10 +2,10 @@ package config
 
 type Config struct {
 	VodQueryRpc *VodUploadRpc `json:"vodQueryRpc"`
-	PprofAddr    string        `json:"pprof"`
-	Redis        *RedisConfig  `json:"redis"`
-	DB           *DBConfig     `json:"db"`
-	Logger       *LoggerConfig `json:"logger"`
+	PprofAddr   string        `json:"pprof"`
+	Redis       *RedisConfig  `json:"redis"`
+	DB          *DBConfig     `json:"db"`
+	Logger      *LoggerConfig `json:"logger"`
 }
 
 // mysql 配置
