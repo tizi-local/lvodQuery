@@ -18,6 +18,14 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type VodQueryServiceClient interface {
 	FeedQuery(ctx context.Context, in *FeedQueryReq, opts ...grpc.CallOption) (*FeedQueryResp, error)
+	CommentQueryFirst(ctx context.Context, in *CommentQueryReq, opts ...grpc.CallOption) (*CommentQueryResp, error)
+	CommentCreateFirst(ctx context.Context, in *CommentCreateReq, opts ...grpc.CallOption) (*Error, error)
+	CommentCreateSecond(ctx context.Context, in *CommentCreateReq, opts ...grpc.CallOption) (*Error, error)
+	CommentQuerySecond(ctx context.Context, in *CommentQueryReq, opts ...grpc.CallOption) (*CommentQueryResp, error)
+	Favorite(ctx context.Context, in *FavoriteReq, opts ...grpc.CallOption) (*Error, error)
+	FavoriteQuery(ctx context.Context, in *ListQuery, opts ...grpc.CallOption) (*FeedQueryResp, error)
+	Like(ctx context.Context, in *LikeReq, opts ...grpc.CallOption) (*Error, error)
+	LikeQuery(ctx context.Context, in *ListQuery, opts ...grpc.CallOption) (*FeedQueryResp, error)
 }
 
 type vodQueryServiceClient struct {
@@ -37,11 +45,91 @@ func (c *vodQueryServiceClient) FeedQuery(ctx context.Context, in *FeedQueryReq,
 	return out, nil
 }
 
+func (c *vodQueryServiceClient) CommentQueryFirst(ctx context.Context, in *CommentQueryReq, opts ...grpc.CallOption) (*CommentQueryResp, error) {
+	out := new(CommentQueryResp)
+	err := c.cc.Invoke(ctx, "/tizi.local.lvodquery.VodQueryService/CommentQueryFirst", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *vodQueryServiceClient) CommentCreateFirst(ctx context.Context, in *CommentCreateReq, opts ...grpc.CallOption) (*Error, error) {
+	out := new(Error)
+	err := c.cc.Invoke(ctx, "/tizi.local.lvodquery.VodQueryService/CommentCreateFirst", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *vodQueryServiceClient) CommentCreateSecond(ctx context.Context, in *CommentCreateReq, opts ...grpc.CallOption) (*Error, error) {
+	out := new(Error)
+	err := c.cc.Invoke(ctx, "/tizi.local.lvodquery.VodQueryService/CommentCreateSecond", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *vodQueryServiceClient) CommentQuerySecond(ctx context.Context, in *CommentQueryReq, opts ...grpc.CallOption) (*CommentQueryResp, error) {
+	out := new(CommentQueryResp)
+	err := c.cc.Invoke(ctx, "/tizi.local.lvodquery.VodQueryService/CommentQuerySecond", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *vodQueryServiceClient) Favorite(ctx context.Context, in *FavoriteReq, opts ...grpc.CallOption) (*Error, error) {
+	out := new(Error)
+	err := c.cc.Invoke(ctx, "/tizi.local.lvodquery.VodQueryService/Favorite", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *vodQueryServiceClient) FavoriteQuery(ctx context.Context, in *ListQuery, opts ...grpc.CallOption) (*FeedQueryResp, error) {
+	out := new(FeedQueryResp)
+	err := c.cc.Invoke(ctx, "/tizi.local.lvodquery.VodQueryService/FavoriteQuery", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *vodQueryServiceClient) Like(ctx context.Context, in *LikeReq, opts ...grpc.CallOption) (*Error, error) {
+	out := new(Error)
+	err := c.cc.Invoke(ctx, "/tizi.local.lvodquery.VodQueryService/Like", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *vodQueryServiceClient) LikeQuery(ctx context.Context, in *ListQuery, opts ...grpc.CallOption) (*FeedQueryResp, error) {
+	out := new(FeedQueryResp)
+	err := c.cc.Invoke(ctx, "/tizi.local.lvodquery.VodQueryService/LikeQuery", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // VodQueryServiceServer is the server API for VodQueryService service.
 // All implementations must embed UnimplementedVodQueryServiceServer
 // for forward compatibility
 type VodQueryServiceServer interface {
 	FeedQuery(context.Context, *FeedQueryReq) (*FeedQueryResp, error)
+	CommentQueryFirst(context.Context, *CommentQueryReq) (*CommentQueryResp, error)
+	CommentCreateFirst(context.Context, *CommentCreateReq) (*Error, error)
+	CommentCreateSecond(context.Context, *CommentCreateReq) (*Error, error)
+	CommentQuerySecond(context.Context, *CommentQueryReq) (*CommentQueryResp, error)
+	Favorite(context.Context, *FavoriteReq) (*Error, error)
+	FavoriteQuery(context.Context, *ListQuery) (*FeedQueryResp, error)
+	Like(context.Context, *LikeReq) (*Error, error)
+	LikeQuery(context.Context, *ListQuery) (*FeedQueryResp, error)
 	mustEmbedUnimplementedVodQueryServiceServer()
 }
 
@@ -51,6 +139,30 @@ type UnimplementedVodQueryServiceServer struct {
 
 func (UnimplementedVodQueryServiceServer) FeedQuery(context.Context, *FeedQueryReq) (*FeedQueryResp, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method FeedQuery not implemented")
+}
+func (UnimplementedVodQueryServiceServer) CommentQueryFirst(context.Context, *CommentQueryReq) (*CommentQueryResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CommentQueryFirst not implemented")
+}
+func (UnimplementedVodQueryServiceServer) CommentCreateFirst(context.Context, *CommentCreateReq) (*Error, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CommentCreateFirst not implemented")
+}
+func (UnimplementedVodQueryServiceServer) CommentCreateSecond(context.Context, *CommentCreateReq) (*Error, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CommentCreateSecond not implemented")
+}
+func (UnimplementedVodQueryServiceServer) CommentQuerySecond(context.Context, *CommentQueryReq) (*CommentQueryResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CommentQuerySecond not implemented")
+}
+func (UnimplementedVodQueryServiceServer) Favorite(context.Context, *FavoriteReq) (*Error, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Favorite not implemented")
+}
+func (UnimplementedVodQueryServiceServer) FavoriteQuery(context.Context, *ListQuery) (*FeedQueryResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method FavoriteQuery not implemented")
+}
+func (UnimplementedVodQueryServiceServer) Like(context.Context, *LikeReq) (*Error, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Like not implemented")
+}
+func (UnimplementedVodQueryServiceServer) LikeQuery(context.Context, *ListQuery) (*FeedQueryResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method LikeQuery not implemented")
 }
 func (UnimplementedVodQueryServiceServer) mustEmbedUnimplementedVodQueryServiceServer() {}
 
@@ -83,6 +195,150 @@ func _VodQueryService_FeedQuery_Handler(srv interface{}, ctx context.Context, de
 	return interceptor(ctx, in, info, handler)
 }
 
+func _VodQueryService_CommentQueryFirst_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CommentQueryReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(VodQueryServiceServer).CommentQueryFirst(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/tizi.local.lvodquery.VodQueryService/CommentQueryFirst",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(VodQueryServiceServer).CommentQueryFirst(ctx, req.(*CommentQueryReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _VodQueryService_CommentCreateFirst_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CommentCreateReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(VodQueryServiceServer).CommentCreateFirst(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/tizi.local.lvodquery.VodQueryService/CommentCreateFirst",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(VodQueryServiceServer).CommentCreateFirst(ctx, req.(*CommentCreateReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _VodQueryService_CommentCreateSecond_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CommentCreateReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(VodQueryServiceServer).CommentCreateSecond(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/tizi.local.lvodquery.VodQueryService/CommentCreateSecond",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(VodQueryServiceServer).CommentCreateSecond(ctx, req.(*CommentCreateReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _VodQueryService_CommentQuerySecond_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CommentQueryReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(VodQueryServiceServer).CommentQuerySecond(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/tizi.local.lvodquery.VodQueryService/CommentQuerySecond",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(VodQueryServiceServer).CommentQuerySecond(ctx, req.(*CommentQueryReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _VodQueryService_Favorite_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(FavoriteReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(VodQueryServiceServer).Favorite(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/tizi.local.lvodquery.VodQueryService/Favorite",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(VodQueryServiceServer).Favorite(ctx, req.(*FavoriteReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _VodQueryService_FavoriteQuery_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListQuery)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(VodQueryServiceServer).FavoriteQuery(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/tizi.local.lvodquery.VodQueryService/FavoriteQuery",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(VodQueryServiceServer).FavoriteQuery(ctx, req.(*ListQuery))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _VodQueryService_Like_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(LikeReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(VodQueryServiceServer).Like(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/tizi.local.lvodquery.VodQueryService/Like",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(VodQueryServiceServer).Like(ctx, req.(*LikeReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _VodQueryService_LikeQuery_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListQuery)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(VodQueryServiceServer).LikeQuery(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/tizi.local.lvodquery.VodQueryService/LikeQuery",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(VodQueryServiceServer).LikeQuery(ctx, req.(*ListQuery))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _VodQueryService_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "tizi.local.lvodquery.VodQueryService",
 	HandlerType: (*VodQueryServiceServer)(nil),
@@ -90,6 +346,38 @@ var _VodQueryService_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "FeedQuery",
 			Handler:    _VodQueryService_FeedQuery_Handler,
+		},
+		{
+			MethodName: "CommentQueryFirst",
+			Handler:    _VodQueryService_CommentQueryFirst_Handler,
+		},
+		{
+			MethodName: "CommentCreateFirst",
+			Handler:    _VodQueryService_CommentCreateFirst_Handler,
+		},
+		{
+			MethodName: "CommentCreateSecond",
+			Handler:    _VodQueryService_CommentCreateSecond_Handler,
+		},
+		{
+			MethodName: "CommentQuerySecond",
+			Handler:    _VodQueryService_CommentQuerySecond_Handler,
+		},
+		{
+			MethodName: "Favorite",
+			Handler:    _VodQueryService_Favorite_Handler,
+		},
+		{
+			MethodName: "FavoriteQuery",
+			Handler:    _VodQueryService_FavoriteQuery_Handler,
+		},
+		{
+			MethodName: "Like",
+			Handler:    _VodQueryService_Like_Handler,
+		},
+		{
+			MethodName: "LikeQuery",
+			Handler:    _VodQueryService_LikeQuery_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

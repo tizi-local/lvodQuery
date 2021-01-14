@@ -1,5 +1,3 @@
-
-
 package db
 
 import (
@@ -18,14 +16,14 @@ var (
 
 func InitDBEngine(c *config.DBConfig, l *log.Logger) {
 	dsn := fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8", c.Username, c.Password, c.Addr, c.DbName)
-	fmt.Printf("connect to db: %s", dsn)
+	fmt.Printf("connect to db: %s\n", dsn)
 	e, err := xorm.NewEngine("mysql", dsn)
 	if err != nil {
 		l.Fatalln("init data failed")
 		return
 	}
 	engine = e
-	err = e.Sync2(new(models.VideoInfo),new(models.Poi))
+	err = e.Sync2(new(models.VideoInfo), new(models.Poi),new(models.CommentFirst),new(models.CommentReply))
 	if err != nil {
 		fmt.Println(err)
 	}

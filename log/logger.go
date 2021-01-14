@@ -1,10 +1,9 @@
-
 package log
 
 import (
 	"fmt"
-	"github.com/tizi-local/lvodQuery/config"
 	"github.com/tizi-local/llib/log"
+	"github.com/tizi-local/lvodQuery/config"
 	"os"
 	"path/filepath"
 )
@@ -57,4 +56,3 @@ func Default() *log.Logger {
 	}
 	return logger
 }
-
