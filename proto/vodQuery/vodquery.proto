@@ -1,0 +1,115 @@
+syntax = "proto3";
+
+import "google/protobuf/any.proto";
+
+package tizi.local.lvodquery;
+
+option go_package = "proto/vodQuery;tizi_local_proto_lvodQuery";
+
+service VodQueryService{
+  rpc FeedQuery (FeedQueryReq) returns(FeedQueryResp);
+  rpc CommentQueryFirst(CommentQueryReq)returns(CommentQueryResp);
+  rpc CommentCreateFirst(CommentCreateReq)returns(Error);
+  rpc CommentCreateSecond(CommentCreateReq)returns(Error);
+  rpc CommentQuerySecond(CommentQueryReq)returns(CommentQueryResp);
+  rpc Favorite(FavoriteReq)returns(Error);
+  rpc FavoriteQuery(ListQuery)returns(FeedQueryResp);
+  rpc Like(LikeReq)returns(Error);
+  rpc LikeQuery(ListQuery)returns(FeedQueryResp);
+}
+enum ErrCode //枚举消息类型
+{
+  Success = 0;
+  Failed = 1;
+}
+
+message Error{
+  ErrCode errCode = 1;
+  string errMsg = 2;
+  repeated google.protobuf.Any details = 3;
+}
+message ListQuery{
+  int64 page = 1;
+  int64 uid = 2;
+}
+message FeedQueryReq{
+  int64 page = 1;
+  Filter filterType = 2;
+  string vSession = 3;
+}
+enum Filter{
+  default = 0;
+  nearby = 1;
+  follow = 2;
+}
+
+message FeedQueryResp{
+  string session = 1;
+  int64 total = 2;
+  int64 page = 3;
+  repeated Videos videos = 4;
+}
+
+message Videos{
+  string vid = 1;
+  string videoUrl = 2;
+  string videoDesc = 3;
+  string videoTitle = 4;
+  int64 likeCount = 5;
+  int64 commentCount = 6;
+  int64 forwardCount = 7;
+  int64 favoriteCount = 8;
+  Author author = 10;
+  repeated Poi poi = 9;
+}
+message Author{
+  string uid = 1;
+  string name = 2;
+}
+message Poi{
+  string name = 1;
+  string poiId = 2;
+  string tags = 3;
+  double longitude = 4;
+  double latitude = 5;
+}
+message CommentQueryReq{
+  int64 page = 1;
+  string vid = 2;
+  int64 commentId = 3;
+}
+message CommentQueryResp{
+  int64 total = 1;
+  int64 page = 2;
+  repeated Comments comments =3;
+}
+message Comments{
+  string commentId = 1;
+  string comment = 6;
+  string uid = 2;
+  repeated MentionUser mentionUser = 3;
+  int64 timestamp = 4;
+  int64 subComCount = 5;
+}
+message MentionUser {
+  string userName = 1;
+  string uid = 2;
+}
+message CommentCreateReq{
+  string vid = 1;
+  string comment = 2;
+  int64 commentId = 3;
+  string uid = 4;
+  repeated MentionUser mentionUser = 5;
+}
+message FavoriteReq{
+  int64 uid = 1;
+  string vid = 2;
+  int32 favorite = 3;
+}
+message LikeReq{
+  int64 uid = 1;
+  string vid = 2;
+  int32 like = 3;
+}
+
