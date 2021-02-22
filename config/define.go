@@ -6,6 +6,7 @@ type Config struct {
 	Redis       *RedisConfig  `json:"redis"`
 	DB          *DBConfig     `json:"db"`
 	Logger      *LoggerConfig `json:"logger"`
+	RpcConfig   *RpcConfig `json:"rpc"`
 }
 
 // mysql 配置
@@ -31,4 +32,9 @@ type VodUploadRpc struct {
 type LoggerConfig struct {
 	Path  string `json:"path"`
 	Level string `json:"level"`
+}
+
+// 模块依赖调用rpc
+type RpcConfig struct {
+	Auth string `json:"auth"`
 }

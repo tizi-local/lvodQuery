@@ -77,7 +77,7 @@ func main() {
 		logger.Error("listen grpc port failed")
 		return
 	}
-	vodQueryService := rpc.NewVodQueryService(logger)
+	vodQueryService := rpc.NewVodQueryService(logger, appConfig.RpcConfig)
 	tizi_local_proto_lvodQuery.RegisterVodQueryServiceServer(s, vodQueryService)
 	if err := s.Serve(conn); err != nil {
 		logger.Error("serve auth rpc failed:", err.Error())
