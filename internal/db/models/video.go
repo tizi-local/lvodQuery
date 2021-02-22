@@ -16,7 +16,9 @@ type VideoInfo struct {
 	CreateTime    time.Time `xorm:"created TIMESTAMP" json:"timestamp"`
 	UpdateTime    time.Time `xorm:"updated TIMESTAMP"`
 	Poi           []Poi     `json:"poi"`
+	AuthorUid     string `json:"author_uid"`
 }
+
 type Poi struct {
 	Vid       string  `xorm:"not null comment('全局vid') VARCHAR(50)" json:"-"`
 	Name      string  `xorm:"not null default '' VARCHAR(50)" json:"name"`

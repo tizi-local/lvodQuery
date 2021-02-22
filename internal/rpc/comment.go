@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"github.com/go-redis/redis/v8"
 	jsoniter "github.com/json-iterator/go"
+	lvodQuery "github.com/tizi-local/commonapis/api/vodQuery"
 	"github.com/tizi-local/lvodQuery/internal/cache"
 	"github.com/tizi-local/lvodQuery/internal/db"
 	"github.com/tizi-local/lvodQuery/internal/db/models"
-	lvodQuery "github.com/tizi-local/lvodQuery/proto/vodQuery"
 	"strconv"
 	"time"
 )
@@ -36,7 +36,7 @@ func (a *VodQueryService) CommentQueryFirst(ctx context.Context, page *lvodQuery
 			cache.ZAdd(ctx, page.Vid, item)
 		}
 	}
-	_, err := cache.SExpire(ctx, page.GetVid(), 24*time.Hour)
+	_, err := cache.Expire(ctx, page.GetVid(), 24*time.Hour)
 	if err != nil {
 		a.Errorf("Expire key:%v failed,err:%v\n",page.GetVid(),err)
 		return nil, err

@@ -48,30 +48,68 @@ const (
 	commonPrefix = "vod"
 )
 
+// set
+func Set(ctx context.Context, key, value string) (string, error) {
+	return Default().Set(ctx, key, value, -1).Result()
+}
+
+// multi get
+func MGet(ctx context.Context, keys ...string) ([]interface{}, error){
+	return Default().MGet(ctx, keys...).Result()
+}
+
+// set and expire
+func SetExpire(ctx context.Context, key, value string, ttl time.Duration) (string, error) {
+	return Default().Set(ctx, key, value, ttl).Result()
+}
+
+// expire
+func Expire(ctx context.Context, key string, ttl time.Duration) (bool, error) {
+	return Default().Expire(ctx, key, ttl).Result()
+}
+
+// exist
+func Exist(ctx context.Context, key string) int64 {
+	return Default().Exists(ctx, key).Val()
+}
+
+// set
 func SAdd(ctx context.Context, key string, value []byte) (int64, error) {
 	return Default().SAdd(ctx, key, value).Result()
 }
-func SNum(ctx context.Context, key string) (int64, error) {
+
+func SCard(ctx context.Context, key string) (int64, error) {
 	return Default().SCard(ctx, key).Result()
 }
 func SPop(ctx context.Context, key string) (string, error) {
 	return Default().SPop(ctx, key).Result()
 }
-func SExpire(ctx context.Context, key string, ttl time.Duration) (bool, error) {
-	return Default().Expire(ctx, key, ttl).Result()
-}
+
 func SGet(ctx context.Context, key string) (string, error) {
 	return Default().SRandMember(ctx, key).Result()
 }
-func ZAdd(ctx context.Context,key string,value *redis.Z)(int64,error){
-	return Default().ZAdd(ctx,key,value).Result()
+
+//zset
+func ZAdd(ctx context.Context, key string, value *redis.Z) (int64, error) {
+	return Default().ZAdd(ctx, key, value).Result()
 }
-func ZRange(ctx context.Context,key string,container [][]byte,start,stop int64)error{
-	return Default().ZRange(ctx,key,start,stop).ScanSlice(container)
+func ZRange(ctx context.Context, key string, container [][]byte, start, stop int64) error {
+	return Default().ZRange(ctx, key, start, stop).ScanSlice(container)
 }
-func Exist(ctx context.Context,key string)int64{
-	return Default().Exists(ctx,key).Val()
+
+func ZNum(ctx context.Context, key string) (int64, error) {
+	return Default().ZCard(ctx, key).Result()
 }
-func ZNum(ctx context.Context,key string)(int64,error){
-	return Default().ZCard(ctx,key).Result()
+
+// list
+func RPush(ctx context.Context, key string, values ...interface{}) (int64, error) {
+	return Default().RPush(ctx, key, values).Result()
+}
+
+func LRange(ctx context.Context, key string, start, stop int64) ([]string ,error) {
+	return Default().LRange(ctx, key, start, stop).Result()
+}
+
+func LLen(ctx context.Context, key string) (int64, error){
+	return Default().LLen(ctx, key).Result()
 }

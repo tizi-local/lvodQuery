@@ -3,9 +3,9 @@ package rpc
 import (
 	"context"
 	jsoniter "github.com/json-iterator/go"
+	lvodQuery "github.com/tizi-local/commonapis/api/vodQuery"
 	"github.com/tizi-local/lvodQuery/internal/db"
 	"github.com/tizi-local/lvodQuery/internal/db/models"
-	lvodQuery "github.com/tizi-local/lvodQuery/proto/vodQuery"
 )
 
 func (a *VodQueryService)Like(ctx context.Context,req *lvodQuery.LikeReq)(*lvodQuery.Error,error){
