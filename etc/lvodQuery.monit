@@ -1,0 +1,3 @@
+check process lvodQuery matching lvodQuery.*config
+   start program = "/root/local/lvodQuery/lvodQueryConsole.sh start" with timeout 10 seconds
+   stop program = "/root/local/lvodQuery/lvodQueryConsole.sh stop"

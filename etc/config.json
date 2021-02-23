@@ -6,10 +6,10 @@
   "vodQueryRpc": {
     "addr": "0.0.0.0:28124"
   },
-  "pprof": "0.0.0.0:28122",
+  "pprof": "0.0.0.0:28125",
   "db": {
     "username":"root",
-    "password": "12345678",
+    "password": "123456",
     "dbName":   "lvod",
     "addr":     "127.0.0.1:3306"
   },

@@ -10,8 +10,8 @@ import (
 	"github.com/tizi-local/lvodQuery/config"
 	"github.com/tizi-local/lvodQuery/internal/cache"
 	"github.com/tizi-local/lvodQuery/internal/db"
-	"github.com/tizi-local/lvodQuery/internal/db/models"
 	"github.com/tizi-local/lvodQuery/internal/feed"
+	"github.com/tizi-local/lvodQuery/pkg/models"
 	"google.golang.org/grpc"
 	"math/rand"
 	"time"
@@ -45,17 +45,21 @@ func (a *VodQueryService) FeedQuery(ctx context.Context, page *lvodQuery.FeedQue
 			stop := (page.Page + 1) * feed.FeedPageSize
 			cacheLen, err := cache.LLen(ctx, sessionCacheKey)
 			if err != nil {
-				a.Errorf("invalid request for cache", err.Error())
+				a.Error("invalid request for cache", err.Error())
 				return nil, fmt.Errorf("query Feed failed:%s", err.Error())
 			}
 			if stop > cacheLen {
-				a.Errorf("exceed feed scan", start, stop, cacheLen)
+				a.Error("exceed feed scan ", start, stop, cacheLen)
 				return nil, fmt.Errorf("execeed feed scan")
 			}
 			keys, err := cache.LRange(ctx, sessionCacheKey, start, stop)
+			if err != nil {
+				a.Error("request cache failed ", err.Error())
+				return nil, err
+			}
 			vDatas, err := cache.MGet(ctx, keys...)
 			if err != nil {
-				a.Errorf("request cache failed", err.Error())
+				a.Error("request cache failed ", err.Error())
 				return nil, err
 			}
 			responseVideos := make([]*lvodQuery.Videos, len(vDatas))
@@ -81,17 +85,17 @@ func (a *VodQueryService) FeedQuery(ctx context.Context, page *lvodQuery.FeedQue
 	} else {
 		// no session input, create a new one`
 		videoInfos := make([]models.VideoInfo, 0)
-		var videoCount int
+		var videoCount int64
 		// get videos info from db
-		err := db.GetDb().Table("video_info").
+		videoCount, err := db.GetDb().
 			Where("video_info.success = ?", 1).
-			Find(&videoCount)
+			Count(new(models.VideoInfo))
 		if err != nil {
 			a.Error("query video_info count failed", err.Error())
 			return nil, fmt.Errorf("query feed failed")
 		}
 		// random scan
-		offset := rand.Intn(videoCount)
+		offset := rand.Int63n(videoCount)
 		err = db.GetDb().Table("video_info").
 			Where("video_info.id >= ? AND video_info.success = ?", offset, 1).
 			Limit(100).
@@ -121,9 +125,9 @@ func (a *VodQueryService) FeedQuery(ctx context.Context, page *lvodQuery.FeedQue
 				}
 				// get user info from lauth
 				user, err := authClient.GetUserInfo(ctx, &lauthRpc.UserRequest{
-					Uid:  v.AuthorUid,
+					Uid: v.AuthorUid,
 				})
-				if err != nil{
+				if err != nil {
 					return nil, err
 				}
 				// set videoInfo cache
@@ -144,17 +148,22 @@ func (a *VodQueryService) FeedQuery(ctx context.Context, page *lvodQuery.FeedQue
 					CommentCount:  v.CommentCount,
 					ForwardCount:  0, // TODO forward count
 					FavoriteCount: v.FavoriteCount,
-					Author:        &lvodQuery.Author{
-						Uid: v.AuthorUid,
-						Name: user.Uid,
+					Author: &lvodQuery.Author{
+						Uid:  v.AuthorUid,
+						Name: user.UserName,
 					},
 				})
 			}
 			_, err = cache.Expire(ctx, session, time.Hour*24)
+			if err != nil {
+				a.Errorf("expire redis key failed,err:%v\n", err)
+				return nil, err
+			}
 			return &lvodQuery.FeedQueryResp{
 				Session: session,
 				Page:    0,
 				Total:   int64(len(videoInfos)),
+				Videos:  responseVideos,
 			}, nil
 		} else {
 			return nil, fmt.Errorf("failed get video feeds")

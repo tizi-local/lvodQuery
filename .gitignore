@@ -1,2 +1,9 @@
-dump.rdb
+.idea
+/lvodQuery
+*.swp
+*.swo
+*.log
+.DS_Store
 lvodQuery
+lvodQuery*.tgz
+*.rdb
