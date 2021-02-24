@@ -12,7 +12,7 @@ require (
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.1 // indirect
 	github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e // indirect
-	github.com/tizi-local/commonapis v0.0.0-20210222112928-a0f2e6af87d8
+	github.com/tizi-local/commonapis v0.0.0-20210224111801-91c392486fd7
 	github.com/tizi-local/llib v0.0.0-20201213194237-98a1420c4b27
 	golang.org/x/crypto v0.0.0-20201124201722-c8d3bf9c5392 // indirect
 	golang.org/x/sys v0.0.0-20201126233918-771906719818 // indirect

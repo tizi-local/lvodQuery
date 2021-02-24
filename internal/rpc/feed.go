@@ -139,6 +139,7 @@ func (a *VodQueryService) FeedQuery(ctx context.Context, page *lvodQuery.FeedQue
 				if err != nil {
 					a.Errorf("Insert redis failed,err:%v\n", err)
 				}
+				//TODO query locations
 				responseVideos = append(responseVideos, &lvodQuery.Videos{
 					Vid:           v.Vid,
 					VideoUrl:      v.Url,
