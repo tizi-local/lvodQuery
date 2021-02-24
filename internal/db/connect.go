@@ -6,7 +6,7 @@ import (
 	"github.com/go-xorm/xorm"
 	"github.com/tizi-local/llib/log"
 	"github.com/tizi-local/lvodQuery/config"
-	"github.com/tizi-local/lvodQuery/internal/db/models"
+	"github.com/tizi-local/lvodQuery/pkg/models"
 	"xorm.io/core"
 )
 
@@ -23,7 +23,7 @@ func InitDBEngine(c *config.DBConfig, l *log.Logger) {
 		return
 	}
 	engine = e
-	err = e.Sync2(new(models.VideoInfo), new(models.Poi),new(models.CommentFirst),new(models.CommentReply))
+	err = e.Sync2(new(models.VideoInfo), new(models.Poi), new(models.CommentFirst), new(models.CommentReply))
 	if err != nil {
 		fmt.Println(err)
 	}

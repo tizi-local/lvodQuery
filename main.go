@@ -4,12 +4,12 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	tizi_local_proto_lvodQuery "github.com/tizi-local/commonapis/api/vodQuery"
 	"github.com/tizi-local/lvodQuery/config"
 	"github.com/tizi-local/lvodQuery/internal/cache"
 	"github.com/tizi-local/lvodQuery/internal/db"
 	"github.com/tizi-local/lvodQuery/internal/rpc"
 	"github.com/tizi-local/lvodQuery/log"
-	tizi_local_proto_lvodQuery "github.com/tizi-local/lvodQuery/proto/vodQuery"
 	"google.golang.org/grpc"
 	"io/ioutil"
 	"net"
@@ -77,7 +77,7 @@ func main() {
 		logger.Error("listen grpc port failed")
 		return
 	}
-	vodQueryService := rpc.NewVodQueryService(logger)
+	vodQueryService := rpc.NewVodQueryService(logger, appConfig.RpcConfig)
 	tizi_local_proto_lvodQuery.RegisterVodQueryServiceServer(s, vodQueryService)
 	if err := s.Serve(conn); err != nil {
 		logger.Error("serve auth rpc failed:", err.Error())
