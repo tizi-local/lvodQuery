@@ -28,10 +28,13 @@ func InitDBEngine(c *config.DBConfig, l *log.Logger) {
 		fmt.Println(err)
 	}
 	// TODO enable in debug; disable in release
-	engine.SetTableMapper(core.SnakeMapper{})
+
 	dbLogger := xorm.NewSimpleLogger(l.Writer())
 	dbLogger.SetLevel(core.LOG_DEBUG)
 	engine.SetLogger(dbLogger)
+	engine.SetTableMapper(core.SnakeMapper{})
+	engine.ShowSQL(true)
+	engine.SetLogLevel(core.LOG_DEBUG)
 }
 
 func GetDb() *xorm.Engine {

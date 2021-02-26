@@ -66,7 +66,7 @@ func (a *VodQueryService) CommentQueryFirst(ctx context.Context, page *lvodQuery
 	}, nil
 }
 func (a *VodQueryService) CommentQuerySecond(ctx context.Context, page *lvodQuery.CommentQueryReq) (*lvodQuery.CommentQueryResp, error) {
-	keyId := string(page.GetCommentId())
+	keyId := strconv.FormatInt(page.GetCommentId(), 10)
 	if cache.Exist(ctx, keyId) == 0 {
 		CommentIndex := make([]models.CommentReply, 0)
 		db.GetDb().Table("comment_reply").Where("comment_id = ?", page.GetCommentId()).Find(&CommentIndex)
