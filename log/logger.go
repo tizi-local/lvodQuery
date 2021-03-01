@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/tizi-local/llib/log"
 	"github.com/tizi-local/lvodQuery/config"
+	"github.com/tizi-local/lvodQuery/internal/base"
 	"os"
 	"path/filepath"
 )
@@ -36,15 +37,20 @@ func NewLogger(config *config.LoggerConfig) *log.Logger {
 		level = log.FatalLevel
 	}
 
-	if err := os.MkdirAll(filepath.Base(config.Path), 0666); err != nil {
-		panic("create directory failed" + config.Path)
+	if !base.Debug {
+		if err := os.MkdirAll(filepath.Dir(config.Path), 0666); err != nil {
+			panic("create directory failed" + config.Path)
+		}
+		f, err := os.OpenFile(config.Path, os.O_WRONLY|os.O_CREATE|os.O_APPEND|os.O_SYNC, 0666)
+		if err != nil {
+			fmt.Printf("log file init failed: %s\n", err.Error())
+			return nil
+		}
+		logger.SetOutput(f)
+	} else {
+		logger.SetOutput(os.Stdout)
 	}
-	f, err := os.OpenFile(config.Path, os.O_WRONLY|os.O_CREATE|os.O_APPEND|os.O_SYNC, 0666)
-	if err != nil {
-		fmt.Printf("log file init failed: %s\n", err.Error())
-		return nil
-	}
-	logger.SetOutput(f)
+
 	logger.SetLevel(level)
 
 	return logger

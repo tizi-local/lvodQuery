@@ -38,7 +38,7 @@ lint:
 	@golangci-lint run --deadline=5m ./...
 
 linux: 
-	GOOS=linux go build -ldflags $(LDFLAGS) -o $(SERVICE)
+	CGO_ENABLED=0 GOOS=linux go build -ldflags $(LDFLAGS) -o $(SERVICE)
 
 images: linux
 	docker build -f Dockerfile -t $(SERVICE):$(TAG_VERSION)-$(shell git rev-parse --short HEAD) .

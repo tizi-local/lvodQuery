@@ -6,6 +6,7 @@ import (
 	"fmt"
 	tizi_local_proto_lvodQuery "github.com/tizi-local/commonapis/api/vodQuery"
 	"github.com/tizi-local/lvodQuery/config"
+	"github.com/tizi-local/lvodQuery/internal/base"
 	"github.com/tizi-local/lvodQuery/internal/cache"
 	"github.com/tizi-local/lvodQuery/internal/db"
 	"github.com/tizi-local/lvodQuery/internal/rpc"
@@ -27,6 +28,7 @@ var (
 var (
 	v          bool
 	configPath string
+	debug      bool
 )
 
 var (
@@ -35,18 +37,24 @@ var (
 
 func parse() {
 	flag.BoolVar(&v, "version", false, "show version")
+	flag.BoolVar(&debug, "debug", false, "Debug mode")
 	flag.StringVar(&configPath, "config", "/app/lvodquery.confg", "lvodquery config file")
 	flag.Parse()
 }
 
 func main() {
 	parse()
+	base.Debug = debug
 	if v {
 		fmt.Println("COMMIT_SHA1:", COMMIT_SHA1)
 		fmt.Println("VERSION:", VERSION)
 		fmt.Println("BUILD_TIME:", BUILD_TIME)
 		flag.Usage()
 		return
+	}
+
+	if debug {
+		configPath = "etc/config-debug.json"
 	}
 
 	configBytes, err := ioutil.ReadFile(configPath)
