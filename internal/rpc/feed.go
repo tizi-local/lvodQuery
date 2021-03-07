@@ -5,8 +5,10 @@ import (
 	"fmt"
 	jsoniter "github.com/json-iterator/go"
 	lauthRpc "github.com/tizi-local/commonapis/api/authority"
+	"github.com/tizi-local/commonapis/api/schedule"
 	lvodQuery "github.com/tizi-local/commonapis/api/vodQuery"
 	"github.com/tizi-local/llib/log"
+	"github.com/tizi-local/llib/utils/convert"
 	"github.com/tizi-local/lvodQuery/config"
 	"github.com/tizi-local/lvodQuery/internal/cache"
 	"github.com/tizi-local/lvodQuery/internal/db"
@@ -33,47 +35,41 @@ func NewVodQueryService(logger *log.Logger, c *config.RpcConfig) *VodQueryServic
 }
 
 func (a *VodQueryService) FeedQuery(ctx context.Context, page *lvodQuery.FeedQueryReq) (*lvodQuery.FeedQueryResp, error) {
-	session := page.GetVSession()
-	a.Debugf("vSession: %s", session)
-	if session != "" {
+	a.Debugf("vSession: %s", page.GetVSession())
+	if page.GetVSession() != "" {
 		// session input
 		// 从redis里拿，拿不到报错
-		if cache.Exist(ctx, session) == 1 {
-
-			sessionCacheKey := cache.Key(cache.VodKeyFeedSession, session)
+		feedCacheKey := cache.Key(cache.VodKeyFeedSession, page.GetVSession())
+		if cache.Exist(ctx, feedCacheKey) == 1 {
 			start := page.Page * feed.FeedPageSize
-			stop := (page.Page + 1) * feed.FeedPageSize
-			cacheLen, err := cache.LLen(ctx, sessionCacheKey)
+			stop := (page.Page + 1) * feed.FeedPageSize - 1
+			cacheLen, err := cache.LLen(ctx, feedCacheKey)
 			if err != nil {
 				a.Error("invalid request for cache", err.Error())
 				return nil, fmt.Errorf("query Feed failed:%s", err.Error())
 			}
-			if stop > cacheLen {
+			if start >= cacheLen {
 				a.Error("exceed feed scan ", start, stop, cacheLen)
-				return nil, fmt.Errorf("execeed feed scan")
+				return nil, feed.ErrorLastOfSession
 			}
-			keys, err := cache.LRange(ctx, sessionCacheKey, start, stop)
+			keys, err := cache.LRange(ctx, feedCacheKey, start, stop)
 			if err != nil {
 				a.Error("request cache failed ", err.Error())
 				return nil, err
 			}
-			vDatas, err := cache.MGet(ctx, keys...)
+			a.Debug("feed keys ", keys)
+			vDatas, err := a.mgetCachedVideoInfo(ctx, keys)
 			if err != nil {
 				a.Error("request cache failed ", err.Error())
 				return nil, err
 			}
-			responseVideos := make([]*lvodQuery.Videos, len(vDatas))
-			for _, vData := range vDatas {
-				video := lvodQuery.Videos{}
-				err := jsoniter.Unmarshal(vData.([]byte), &video)
-				if err != nil {
-					a.Error("unmarshal error", err.Error())
-					continue
-				}
-				responseVideos = append(responseVideos, &video)
+			responseVideos, err := a.ConvertVideoModel2Pb(ctx, vDatas)
+			if err != nil{
+				a.Error("convert model to pb video error:", err)
+				return nil, err
 			}
 			return &lvodQuery.FeedQueryResp{
-				Session: session,
+				Session: page.GetVSession(),
 				Total:   int64(len(responseVideos)),
 				Page:    page.Page,
 				Videos:  responseVideos,
@@ -84,7 +80,7 @@ func (a *VodQueryService) FeedQuery(ctx context.Context, page *lvodQuery.FeedQue
 		}
 	} else {
 		// no session input, create a new one`
-		videoInfos := make([]models.VideoInfo, 0)
+		videoInfos := make([]*models.VideoInfo, 0)
 		var videoCount int64
 		// get videos info from db
 		videoCount, err := db.GetDb().
@@ -98,66 +94,50 @@ func (a *VodQueryService) FeedQuery(ctx context.Context, page *lvodQuery.FeedQue
 		offset := rand.Int63n(videoCount)
 		err = db.GetDb().Table("video_info").
 			Where("video_info.id >= ? AND video_info.success = ?", offset, 1).
-			Limit(100).
+			Limit(feed.FeedCountLimit).
 			Find(&videoInfos)
 		if err != nil {
 			a.Error("query video_info data failed", err.Error())
 			return nil, fmt.Errorf("query feed failed")
 		}
 		if len(videoInfos) != 0 {
-			// generate new session and cache
-			session := a.feedGenerator.GenerateSession()
+			// generate new feed and cache
+			newFeed := a.feedGenerator.NewFeed(videoInfos)
+			session := newFeed.Session
 			responseVideos := make([]*lvodQuery.Videos, 0)
-			cc, err := grpc.Dial(a.config.Auth, grpc.WithInsecure())
-			if err != nil {
-				a.Error("dial sms rpc error:", err.Error())
-				return nil, err
-			}
-			authClient := lauthRpc.NewAuthServiceClient(cc)
+			feedCacheKey := cache.Key(cache.VodKeyFeedSession, session)
 			for _, v := range videoInfos {
 				// get poi from db
-				// TODO use join
-				err = db.GetDb().Table("poi").Where("poi.vid = ?", v.Vid).
-					Find(&(v.Poi))
-				if err != nil {
-					a.Errorf("get data from db failed,err:%v\n", err)
-					return nil, err
-				}
+				//err = db.GetDb().Table("poi").Where("poi.vid = ?", v.Vid).
+				//	Find(&(v.Poi))
+				//if err != nil {
+				//	a.Errorf("get data from db failed,err:%v\n", err)
+				//	return nil, err
+				//}
 				// get user info from lauth
-				user, err := authClient.GetUserInfo(ctx, &lauthRpc.UserRequest{
-					Uid: v.AuthorUid,
-				})
-				if err != nil {
-					return nil, err
-				}
 				// set videoInfo cache
-				err = a.cacheVideoInfo(ctx, &v)
+				err = a.cacheVideoInfo(ctx, v)
 				if err != nil {
 					continue
 				}
-				_, err = cache.RPush(ctx, session, v.Vid)
+				_, err = cache.RPush(ctx, feedCacheKey, cache.Key(cache.VodKeyVideo, v.Vid))
 				if err != nil {
 					a.Errorf("Insert redis failed,err:%v\n", err)
 				}
-				//TODO query locations
-				responseVideos = append(responseVideos, &lvodQuery.Videos{
-					Vid:           v.Vid,
-					VideoUrl:      v.Url,
-					VideoDesc:     v.VideoDesc,
-					VideoTitle:    v.VideoTitle,
-					LikeCount:     v.LikeCount,
-					CommentCount:  v.CommentCount,
-					ForwardCount:  0, // TODO forward count
-					FavoriteCount: v.FavoriteCount,
-					Author: &lvodQuery.Author{
-						Uid:  v.AuthorUid,
-						Name: user.UserName,
-					},
-				})
 			}
-			_, err = cache.Expire(ctx, session, time.Hour*24)
+			_, err = cache.Expire(ctx, feedCacheKey, time.Hour*24)
 			if err != nil {
 				a.Errorf("expire redis key failed,err:%v\n", err)
+				return nil, err
+			}
+
+			// return the first FeedPageSize videos in this session
+			if len(videoInfos) > feed.FeedPageSize {
+				videoInfos = videoInfos[:feed.FeedPageSize]
+			}
+			responseVideos, err = a.ConvertVideoModel2Pb(ctx, videoInfos)
+			if err != nil{
+				a.Error("convert model to pb video error:", err)
 				return nil, err
 			}
 			return &lvodQuery.FeedQueryResp{
@@ -173,11 +153,68 @@ func (a *VodQueryService) FeedQuery(ctx context.Context, page *lvodQuery.FeedQue
 }
 
 func (a *VodQueryService) cacheVideoInfo(ctx context.Context, v *models.VideoInfo) error {
-	l, err := jsoniter.Marshal(v)
+	bytes, err := jsoniter.Marshal(v)
 	if err != nil {
 		a.Errorf("JSON marshal failed,err:%v\n", err)
 		return err
 	}
-	_, err = cache.SetExpire(ctx, cache.Key(cache.VodKeyVideo, v.Vid), string(l), 24*time.Hour)
+	_, err = cache.SetExpire(ctx, cache.Key(cache.VodKeyVideo, v.Vid), string(bytes), 24*time.Hour)
 	return err
+}
+
+func (a *VodQueryService) mgetCachedVideoInfo(ctx context.Context, vids []string) ([]*models.VideoInfo, error){
+	res, err := cache.MGet(ctx,  vids...)
+	if err != nil{
+		return []*models.VideoInfo{}, err
+	}
+	videos := make([]*models.VideoInfo, 0)
+	for i := range res {
+		bs := convert.String2Bytes(res[i].(string))
+		v := &models.VideoInfo{}
+		err := jsoniter.Unmarshal(bs, v)
+		if err != nil{
+			continue
+		}
+		videos = append(videos, v)
+	}
+
+	return videos, nil
+}
+
+func (a *VodQueryService) ConvertVideoModel2Pb(ctx context.Context, videos []*models.VideoInfo)([]*lvodQuery.Videos, error){
+	cc, err := grpc.Dial(a.config.Auth, grpc.WithInsecure())
+	if err != nil {
+		a.Error("dial sms rpc error:", err.Error())
+		return nil, err
+	}
+	authClient := lauthRpc.NewAuthServiceClient(cc)
+	responseVideos := make([]*lvodQuery.Videos, 0)
+	for _, v := range videos {
+		user, err := authClient.GetUserInfo(ctx, &lauthRpc.UserRequest{
+			Uid: v.AuthorUid,
+		})
+		if err != nil {
+			return nil, err
+		}
+		//TODO query locations
+		responseVideos = append(responseVideos, &lvodQuery.Videos{
+			Vid:           v.Vid,
+			VideoUrl:      v.Url,
+			VideoDesc:     v.VideoDesc,
+			VideoTitle:    v.VideoTitle,
+			LikeCount:     v.LikeCount,
+			CommentCount:  v.CommentCount,
+			ForwardCount:  0, // TODO forward count
+			FavoriteCount: v.FavoriteCount,
+			Author: &lvodQuery.Author{
+				Uid:  v.AuthorUid,
+				Name: user.UserName,
+			},
+			Locations: []*schedule.Location{},
+			CoverUrl:      v.CovertUrl,
+			GoodsUrl:      v.GoodsUrl,
+		})
+	}
+
+	return responseVideos, nil
 }

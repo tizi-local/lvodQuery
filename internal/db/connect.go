@@ -23,7 +23,7 @@ func InitDBEngine(c *config.DBConfig, l *log.Logger) {
 		return
 	}
 	engine = e
-	err = e.Sync2(new(models.VideoInfo), new(models.Poi), new(models.CommentFirst), new(models.CommentReply))
+	err = e.Sync2(new(models.VideoInfo), new(models.Poi), new(models.CommentFirst), new(models.CommentReply), new(models.LikeList))
 	if err != nil {
 		fmt.Println(err)
 	}

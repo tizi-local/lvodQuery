@@ -19,6 +19,9 @@ type VideoInfo struct {
 	UpdateTime    time.Time `xorm:"updated TIMESTAMP"`
 	Poi           []Poi     `json:"poi"`
 	AuthorUid     string    `json:"author_uid"`
+	GoodsUrl      string    `xorm:"not null TEXT" json:"goods_url"`
+	CovertUrl     string    `xorm:"not null TEXT" json:"covert_url"`
+	Deleted       bool      `xorm:"not null default 0 TINYINT(1)" json:"-"` // 软删
 }
 
 type Poi struct {
