@@ -1,6 +1,8 @@
 package db
 
 import (
+	"github.com/stretchr/testify/assert"
+	ljson "github.com/tizi-local/llib/encoding/json"
 	"github.com/tizi-local/llib/log"
 	"github.com/tizi-local/lvodQuery/config"
 	"github.com/tizi-local/lvodQuery/pkg/models"
@@ -55,4 +57,52 @@ func TestInsert(t *testing.T) {
 		t.Fatal(err)
 	}
 
+}
+
+func TestM2MFind(t *testing.T) {
+	s := GetDb().NewSession()
+	_, err := s.Insert([]*models.Location{
+		{
+			Lid:       models.GenerateLid(22.4939700, 114.0723000),
+			Latitude:  114.0723000,
+			Longitude: 22.4939700,
+			Category:  1,
+			Address:   "shenzhen 110-221",
+			Country:   "china",
+			Province:  "guangdong",
+			City:      "shenzhen",
+			District:  "futian",
+			Street:    "fuqiang",
+			CityCode:  "0755",
+			AdCode:    "4000",
+			PoiName:   "poi example2",
+			AoiName:   "futian",
+		},
+		{
+			Lid:       models.GenerateLid(22.4939614, 114.0728131),
+			Latitude:  114.0728131,
+			Longitude: 22.4939614,
+			Category:  1,
+			Address:   "shenzhen 110-222",
+			Country:   "china",
+			Province:  "guangdong",
+			City:      "shenzhen",
+			District:  "futian",
+			Street:    "fuqiang",
+			CityCode:  "0755",
+			AdCode:    "4000",
+			PoiName:   "poi example",
+			AoiName:   "futian",
+		},
+	})
+	assert.NoError(t, err, "insert error")
+	defer s.Close()
+}
+
+func TestJoinGetDb(t *testing.T) {
+	s := GetDb().NewSession()
+	locations, err := models.QueryVideoLocations(s, "lv867f7622fe5d4cf972d801dcbcc777f4")
+	assert.NoError(t, err, "query video locations error")
+	defer s.Close()
+	t.Log(ljson.MustMarshalIndentToString(locations))
 }
