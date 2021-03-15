@@ -60,13 +60,13 @@ func TestHMGet(t *testing.T) {
 
 	data, err := HMGet(context.Background(), hsetKey, "abc", "bbc")
 	assert.NoError(t, err, "get error %v", err)
-	for i := range data{
+	for i := range data {
 		d, ok := data[i].(string)
 		if ok {
 			t.Log("d:", d)
 			c := models.CommentFirst{}
 			err := jsoniter.UnmarshalFromString(d, &c)
-			if err != nil{
+			if err != nil {
 				t.Error("unmarshal error", err.Error())
 				continue
 			}
@@ -74,4 +74,13 @@ func TestHMGet(t *testing.T) {
 		}
 	}
 
+}
+
+func TestDel(t *testing.T) {
+	res, err := Del(context.Background(), "daniel123", "12333")
+	if err != nil {
+		t.Error(err)
+	}
+
+	t.Log(res)
 }
