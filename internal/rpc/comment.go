@@ -33,6 +33,13 @@ func (a *VodQueryService) CommentQueryFirst(ctx context.Context, req *lvodQuery.
 	// TODO 根据scoreRank
 	keys := cache.ZREVRange(ctx, timelineRank, req.GetPage()*20, (req.GetPage()+1)*20-1)
 	a.Debug("timeline comment keys:", keys)
+	if len(keys) == 0 {
+		return &lvodQuery.CommentQueryResp{
+			Total:    0,
+			Page:     req.GetPage(),
+			Comments: []*lvodQuery.Comments{},
+		}, nil
+	}
 	res, err := cache.HMGet(ctx, metaDataKey, keys...)
 	if err != nil {
 		a.Errorf("get comment data error: %s", err.Error())
@@ -146,7 +153,8 @@ func (a *VodQueryService) CommentCreateFirst(ctx context.Context, req *lvodQuery
 	}
 	dbSession.Commit()
 	// 插入新评论，更新缓存
-	go a.rebuildVideoCommentCache(ctx, newComment.Vid)
+	//go a.rebuildVideoCommentCache(ctx, newComment.Vid)
+	a.deleteVodCommentCache(ctx, newComment.Vid)
 	return &lvodQuery.Error{
 		ErrCode: lvodQuery.ErrCode_Success,
 		ErrMsg:  "",
@@ -214,6 +222,7 @@ func (a *VodQueryService) rebuildVideoCommentCache(ctx context.Context, vid stri
 	timelineRank := cache.Key(cache.VodCommentKeyTimeline, vid)
 
 	if err := a.deleteVodCommentCache(ctx, vid); err != nil {
+		a.Errorf("delete video comment cache error:", err)
 		return err
 	}
 
